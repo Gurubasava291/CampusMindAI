@@ -47,6 +47,12 @@ def test_dashboard_access(client):
     assert b"Dayananda Sagar University" in response.data
     assert b"Sustainability Dashboard" in response.data
 
+def test_cat_status(client):
+    response = client.get('/api/cat')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data['status'] == 'success'
+    assert data['message'] == 'Backend is running'
 
 def test_guest_home_offers_sign_in_and_registration(client):
     response = client.get('/')

@@ -3,6 +3,11 @@ from models.db import query_db
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
+@api_bp.route('/cat')
+def cat_status():
+    """Simple endpoint confirming the backend API is available."""
+    return jsonify({'status': 'success', 'message': 'Backend is running'})
+
 @api_bp.route('/map-issues')
 def map_issues():
     """
