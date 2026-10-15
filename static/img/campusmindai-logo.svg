@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 670 100" role="img" aria-labelledby="title">
+  <title id="title">CampusMindAi</title>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#70A6C1"/>
+      <stop offset="0.52" stop-color="#315594"/>
+      <stop offset="1" stop-color="#2F3675"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M43 17c-8-8-22-3-22 8-10 2-13 14-7 21-6 8-2 19 7 21-1 12 13 18 22 10 7 7 19 4 21-5V22c-3-8-14-11-21-5Z"/>
+    <path d="M43 17v60M29 22v10l9 5m-20 9h17m-13 19 11-8m20-34v10l10 5m-10 10h15m-15 10 10 7m-24-22h9"/>
+    <path d="M64 27h10m-10 18h13m-13 18h10"/>
+    <circle cx="77" cy="27" r="2.5" fill="url(#brand)"/>
+    <circle cx="80" cy="45" r="2.5" fill="url(#brand)"/>
+    <circle cx="77" cy="63" r="2.5" fill="url(#brand)"/>
+    <circle cx="37" cy="37" r="2" fill="url(#brand)"/>
+    <circle cx="35" cy="55" r="2" fill="url(#brand)"/>
+  </g>
+  <text x="96" y="69" fill="url(#brand)" font-family="Comfortaa, Trebuchet MS, sans-serif" font-size="51" font-weight="600">CampusMindAi</text>
+</svg>

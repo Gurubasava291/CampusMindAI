@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Sustainability Dashboard | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Dashboard Header -->
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Dayananda Sagar University — Sustainability Dashboard</h2>
+            <p class="page-subtitle">
+                Real-time campus environmental intelligence, incident tracking, clean energy metrics, and water conservation.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span class="verified-campus-badge">
+                <i class="bi bi-geo-alt-fill"></i> Harohalli Innovation Campus & City Campus
+            </span>
+            <a href="{{ url_for('reports.report_issue') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> New Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Live KPI Metrics Grid -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon reports">
+                <i class="bi bi-flag-fill"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Total Reports</div>
+                <div class="kpi-value">{{ total_reports }}</div>
+                <div class="kpi-subtext">Active student & staff submissions</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon pending">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Active / In Progress</div>
+                <div class="kpi-value">{{ pending_reports }}</div>
+                <div class="kpi-subtext">{{ priority_counts.critical }} critical urgency tasks</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon resolved">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Resolved Issues</div>
+                <div class="kpi-value">{{ resolved_reports }}</div>
+                <div class="kpi-subtext">{{ resolution_rate }}% university resolution rate</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon carbon">
+                <i class="bi bi-cloud-minus-fill"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Carbon Avoided</div>
+                <div class="kpi-value">{{ carbon_avoided_kg }} <span style="font-size: 1rem; font-weight: 500;">kg</span></div>
+                <div class="kpi-subtext">Estimated CO₂e savings</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon solar">
+                <i class="bi bi-sun-fill"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Solar Clean Power</div>
+                <div class="kpi-value">{{ total_solar_kwh }} <span style="font-size: 1rem; font-weight: 500;">kWh</span></div>
+                <div class="kpi-subtext">DSU Rooftop Solar Array logs</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon water">
+                <i class="bi bi-droplet-fill"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-label">Water Recycled / Saved</div>
+                <div class="kpi-value">{{ "{:,.0f}".format(total_water_recycled) }} <span style="font-size: 1rem; font-weight: 500;">L</span></div>
+                <div class="kpi-subtext">STP & Rainwater retention basin</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+        <!-- Environmental Issues by Category -->
+        <div class="chart-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-pie-chart-fill" style="color: var(--forest-green);"></i>
+                    Environmental Issues by Category
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time database records</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Priority Breakdown & Urgency -->
+        <div class="chart-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-bar-chart-fill" style="color: var(--sage-green);"></i>
+                    Active Urgency Levels
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Pending maintenance tickets</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Sustainability Targets & Recent Issues -->
+    <div class="dashboard-reports-grid">
+
+        <!-- Sustainability Goals Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-bullseye" style="color: var(--forest-green);"></i>
+                    Campus Green Targets
+                </div>
+                <a href="{{ url_for('monitoring.impact_analytics') }}" style="font-size: 0.75rem; font-weight: 600;">Details &rarr;</a>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for g in active_goals %}
+                <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                        <span>{{ g.title }}</span>
+                        <span style="color: var(--forest-green);">{{ g.current_value }} / {{ g.target_value }} {{ g.unit }}</span>
+                    </div>
+                    {% set pct = (g.current_value / g.target_value * 100)|round|int if g.target_value > 0 else 0 %}
+                    <div style="background: var(--bg-alt); height: 8px; border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-light);">
+                        <div style="background: linear-gradient(90deg, var(--forest-green), var(--sage-green)); height: 100%; width: {{ [pct, 100]|min }}%; border-radius: var(--radius-full);"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Campus Reports Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-clock-history" style="color: var(--forest-green);"></i>
+                    Recent Environmental Reports
+                </div>
+                <a href="{{ url_for('main.sustainability_map') }}" style="font-size: 0.75rem; font-weight: 600;">View Map &rarr;</a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket #</th>
+                            <th>Issue Title</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recent_reports %}
+                        <tr>
+                            <td style="font-weight: 600; font-family: monospace;">{{ r.report_number }}</td>
+                            <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">
+                                {{ r.title }}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ r.category }}">{{ r.category }}</span>
+                            </td>
+                            <td style="font-size: 0.8125rem; color: var(--text-secondary);">
+                                {{ r.building_name }} ({{ r.floor }})
+                            </td>
+                            <td>
+                                <span class="badge priority-{{ r.priority }}">{{ r.priority }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ r.status }}">{{ r.status.replace('_', ' ') }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('reports.report_detail', report_id=r.id) }}" class="btn btn-secondary btn-sm">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                                No environmental issues reported yet. Be the first to report!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Category Doughnut Chart
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Water Wastage', 'Electricity', 'Waste Mgmt', 'Green Spaces', 'Infrastructure'],
+            datasets: [{
+                data: [
+                    {{ category_counts.water }},
+                    {{ category_counts.electricity }},
+                    {{ category_counts.waste }},
+                    {{ category_counts.greenery }},
+                    {{ category_counts.infrastructure }}
+                ],
+                backgroundColor: ['#0284C7', '#D97706', '#059669', '#15803D', '#7C3AED'],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } }
+            },
+            cutout: '65%'
+        }
+    });
+
+    // Priority Bar Chart
+    const prioCtx = document.getElementById('priorityChart').getContext('2d');
+    new Chart(prioCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Critical', 'High', 'Medium', 'Low'],
+            datasets: [{
+                label: 'Active Issues',
+                data: [
+                    {{ priority_counts.critical }},
+                    {{ priority_counts.high }},
+                    {{ priority_counts.medium }},
+                    {{ priority_counts.low }}
+                ],
+                backgroundColor: ['#DC2626', '#EA580C', '#EAB308', '#64748B'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter' } } },
+                x: { ticks: { font: { family: 'Inter' } } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

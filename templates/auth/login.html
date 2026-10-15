@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 40px auto;">
+
+    <div class="card" style="padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <img class="auth-brand-logo" src="{{ url_for('static', filename='img/campusmindai-logo.svg') }}" alt="CampusMindAi">
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">
+                Student & Staff Sign-In • Dayananda Sagar University
+            </p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div style="margin-bottom: 18px;">
+                <label for="login_input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    DSU Email or Username
+                </label>
+                <input type="text" id="login_input" name="login_input" required value="{{ request.args.get('email', '') }}" placeholder="e.g. student@dsu.edu.in"
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="margin-bottom: 22px;">
+                <label for="password" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Password <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="password" id="password" name="password" required placeholder="••••••••" autofocus
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="text-align: right; margin: -12px 0 16px; font-size: 0.8125rem;">
+                <a href="{{ url_for('auth.forgot_password') }}" style="font-weight: 600; color: var(--forest-green);">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-size: 1rem; margin-bottom: 16px;">
+                Sign In to CampusMindAi
+            </button>
+
+            <div style="text-align: center; font-size: 0.8125rem; color: var(--text-secondary);">
+                Don't have an account? <a href="{{ url_for('auth.register') }}" style="font-weight: 600; color: var(--forest-green);">Register here</a>
+            </div>
+        </form>
+
+        <!-- Administrator Portal Link -->
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--border-medium); text-align: center;">
+            <a href="{{ url_for('auth.admin_login') }}" style="font-size: 0.8125rem; font-weight: 700; color: #B45309;">
+                <i class="bi bi-shield-lock-fill"></i> University Administrator Sign-In &rarr;
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}My Reports | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>My Environmental Reports</h2>
+            <p class="page-subtitle">
+                Track status updates, staff resolution notes, and earned Green Points for issues you reported.
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('reports.report_issue') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> New Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card" style="margin-bottom: 24px; padding: 14px 20px;">
+        <form method="GET" action="{{ url_for('reports.my_reports') }}" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            <div style="font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary);">Filter By:</div>
+            
+            <select name="status" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                <option value="">All Statuses</option>
+                <option value="submitted" {% if current_status == 'submitted' %}selected{% endif %}>Submitted</option>
+                <option value="verified" {% if current_status == 'verified' %}selected{% endif %}>Verified</option>
+                <option value="assigned" {% if current_status == 'assigned' %}selected{% endif %}>Assigned</option>
+                <option value="in_progress" {% if current_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="resolved" {% if current_status == 'resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+
+            <select name="category" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                <option value="">All Categories</option>
+                <option value="water" {% if current_cat == 'water' %}selected{% endif %}>Water Wastage</option>
+                <option value="electricity" {% if current_cat == 'electricity' %}selected{% endif %}>Electricity</option>
+                <option value="waste" {% if current_cat == 'waste' %}selected{% endif %}>Waste Management</option>
+                <option value="greenery" {% if current_cat == 'greenery' %}selected{% endif %}>Green Spaces</option>
+                <option value="infrastructure" {% if current_cat == 'infrastructure' %}selected{% endif %}>Infrastructure</option>
+            </select>
+
+            {% if current_status or current_cat %}
+            <a href="{{ url_for('reports.my_reports') }}" class="btn btn-secondary btn-sm" style="padding: 4px 10px;">
+                Reset
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Reports Table / Cards -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Title & Description</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reports %}
+                    <tr>
+                        <td style="font-weight: 700; font-family: monospace;">{{ r.report_number }}</td>
+                        <td style="max-width: 260px;">
+                            <div style="font-weight: 600; color: var(--forest-green-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ r.title }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ r.description }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ r.category }}">{{ r.category }}</span>
+                        </td>
+                        <td style="font-size: 0.8125rem;">
+                            {{ r.building_name }} ({{ r.floor }})<br>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ r.specific_spot }}</span>
+                        </td>
+                        <td>
+                            <span class="badge priority-{{ r.priority }}">{{ r.priority }}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ r.status }}">{{ r.status.replace('_', ' ') }}</span>
+                        </td>
+                        <td style="font-size: 0.75rem; color: var(--text-muted);">
+                            {{ r.created_at[:10] }}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('reports.report_detail', report_id=r.id) }}" class="btn btn-secondary btn-sm">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: var(--sage-green-light);"></i>
+                            You haven't submitted any environmental reports yet. Help Dayananda Sagar University stay green!
+                            <div style="margin-top: 14px;">
+                                <a href="{{ url_for('reports.report_issue') }}" class="btn btn-primary btn-sm">Report an Issue</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

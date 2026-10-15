@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Environmental Impact | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Campus Environmental Impact Analytics</h2>
+            <p class="page-subtitle">
+                Quantified environmental benefits, avoided greenhouse gas emissions, and university sustainability targets.
+            </p>
+        </div>
+        <div>
+            <span class="verified-campus-badge">
+                <i class="bi bi-shield-check"></i> Verified Carbon Equivalency Calculations
+            </span>
+        </div>
+    </div>
+
+    <!-- Impact Hero Highlights -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;">
+
+        <div class="card" style="background: linear-gradient(135deg, #0D2818, #164227); color: white; display: flex; align-items: center; gap: 20px;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0; color: #86EFAC;">
+                <i class="bi bi-cloud-minus-fill"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 1px; color: #A7F3D0; font-weight: 700;">
+                    Total Avoided Carbon Emissions
+                </div>
+                <div style="font-size: 2.4rem; font-weight: 800; font-family: 'Outfit', sans-serif;">
+                    {{ "{:,.1f}".format(total_co2_avoided) }} <span style="font-size: 1.2rem; font-weight: 500;">kg CO₂e</span>
+                </div>
+                <p style="font-size: 0.8125rem; color: #CBD5E1; margin-top: 4px;">
+                    Achieved through rooftop solar generation, leak elimination & composting.
+                </p>
+            </div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, #14532D, #22C55E); color: white; display: flex; align-items: center; gap: 20px;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; flex-shrink: 0;">
+                🌳
+            </div>
+            <div>
+                <div style="font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 1px; color: #DCFCE7; font-weight: 700;">
+                    Equivalent Tree Environmental Offset
+                </div>
+                <div style="font-size: 2.4rem; font-weight: 800; font-family: 'Outfit', sans-serif;">
+                    {{ "{:,.1f}".format(trees_equivalent) }} <span style="font-size: 1.2rem; font-weight: 500;">Trees</span>
+                </div>
+                <p style="font-size: 0.8125rem; color: #DCFCE7; margin-top: 4px;">
+                    Equivalent to carbon absorbed by mature Bangalore Neem & Gulmohar trees annually.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Avoided Emissions Sources Breakdown -->
+    <div class="card" style="margin-bottom: 28px;">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-pie-chart-fill" style="color: var(--forest-green);"></i>
+                Sources of Avoided Carbon Emissions
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Methodology: CEA India Grid Baseline Emission Factor (0.82 kg CO2/kWh)</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+            <div style="background: var(--bg-alt); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 700; color: #D97706;"><i class="bi bi-sun-fill"></i> Rooftop Solar Generation</span>
+                    <strong>{{ co2_solar }} kg</strong>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
+                    Direct clean electricity displacement of thermal coal grid power.
+                </p>
+            </div>
+
+            <div style="background: var(--bg-alt); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 700; color: #059669;"><i class="bi bi-recycle"></i> Organic Composting</span>
+                    <strong>{{ co2_waste }} kg</strong>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
+                    Avoided anaerobic methane generation in municipal landfills.
+                </p>
+            </div>
+
+            <div style="background: var(--bg-alt); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 700; color: #0284C7;"><i class="bi bi-droplet-fill"></i> Pumping & Water Leaks</span>
+                    <strong>{{ co2_leaks_prevented }} kg</strong>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5;">
+                    Avoided energy draw for pressurized hydro-pneumatic pumping.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sustainability Goals Tracking -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-bullseye" style="color: var(--forest-green);"></i>
+                Dayananda Sagar University Sustainability Goals & Deadlines
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for g in goals %}
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div>
+                        <strong style="font-size: 0.9375rem; color: var(--forest-green-dark);">{{ g.title }}</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 8px;">Deadline: {{ g.deadline }}</span>
+                    </div>
+                    <div style="font-weight: 700; color: var(--forest-green);">
+                        {{ g.current_value }} / {{ g.target_value }} {{ g.unit }}
+                    </div>
+                </div>
+
+                {% set pct = (g.current_value / g.target_value * 100)|round|int if g.target_value > 0 else 0 %}
+                <div style="background: var(--bg-alt); height: 10px; border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-light); margin-bottom: 6px;">
+                    <div style="background: linear-gradient(90deg, var(--forest-green), var(--sage-green)); height: 100%; width: {{ [pct, 100]|min }}%; border-radius: var(--radius-full);"></div>
+                </div>
+
+                <div style="font-size: 0.8125rem; color: var(--text-secondary);">
+                    {{ g.description }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

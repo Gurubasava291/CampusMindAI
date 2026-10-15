@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Notifications & Status Alerts</h2>
+            <p class="page-subtitle">
+                Updates on your reported issues, maintenance assignments, and green achievements.
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for n in notifications %}
+            <div style="padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-light); background: {% if not n.is_read %}#F0FDF4{% else %}var(--bg-alt){% endif %}; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;">
+                <div>
+                    <h4 style="font-size: 0.9375rem; margin-bottom: 4px; color: var(--forest-green-dark);">
+                        {{ n.title }}
+                    </h4>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px;">
+                        {{ n.message }}
+                    </p>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">{{ n.created_at }}</span>
+                </div>
+                {% if n.link %}
+                <a href="{{ n.link }}" class="btn btn-secondary btn-sm" style="flex-shrink: 0;">
+                    View &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <i class="bi bi-bell-slash" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: var(--sage-green-light);"></i>
+                You have no notifications yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

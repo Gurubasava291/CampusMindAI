@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusMindAi — AI-Powered Sustainable Campus{% endblock %}</title>
+    <meta name="description" content="CampusMindAi is Dayananda Sagar University's sustainability platform for reporting environmental problems, managing green maintenance, exploring the virtual campus tour, and tracking sustainability progress.">
+    <meta name="keywords" content="Dayananda Sagar University, DSU, Bengaluru, Sustainable Campus, Environmental Issue Reporting, Clean Energy">
+
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Leaflet CSS for Operational Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Application CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main Navigation Header -->
+    <header class="header-nav {% if current_user and current_user.role == 'admin' %}admin-nav-theme{% endif %}">
+        <div class="nav-container">
+            <a href="{% if current_user and current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% elif current_user %}{{ url_for('main.dashboard') }}{% else %}{{ url_for('main.home') }}{% endif %}" class="brand-wrapper">
+                <img class="brand-logo" src="{{ url_for('static', filename='img/campusmindai-logo.svg') }}" alt="CampusMindAi">
+                <div class="brand-info">
+                    <span class="brand-subtitle">
+                        {% if current_user and current_user.role == 'admin' %}
+                            <strong style="color: #D97706;"><i class="bi bi-gear-wide-connected"></i> Executive Operations Console</strong>
+                        {% else %}
+                            AI-Powered Sustainable Campus
+                        {% endif %}
+                    </span>
+                </div>
+            </a>
+
+            <!-- Distinct Navigation Links for Admin vs User -->
+            <ul class="nav-links">
+                {% if current_user and current_user.role == 'admin' %}
+                    <!-- ================= ADMIN EXCLUSIVE NAVIGATION ================= -->
+                    <li>
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                            <i class="bi bi-speedometer2"></i> Operations Hub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.all_reports') }}" class="nav-link {% if request.endpoint in ['admin.all_reports', 'reports.report_detail'] %}active{% endif %}" style="color: #FBBF24;">
+                            <i class="bi bi-exclamation-square-fill"></i> All Problems
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('maintenance.maintenance_queue') }}" class="nav-link {% if request.endpoint == 'maintenance.maintenance_queue' %}active{% endif %}">
+                            <i class="bi bi-wrench-adjustable-circle-fill"></i> Work Orders Queue
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.users') }}" class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
+                            <i class="bi bi-people-fill"></i> Users & Roles
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.locations') }}" class="nav-link {% if request.endpoint == 'admin.locations' %}active{% endif %}">
+                            <i class="bi bi-geo-alt-fill"></i> Campus Buildings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.audit_logs') }}" class="nav-link {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}">
+                            <i class="bi bi-shield-check"></i> Audit Logs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('main.dashboard') }}" class="nav-link" style="border: 1px dashed var(--border-medium); font-size: 0.8125rem;" title="Preview student portal">
+                            <i class="bi bi-eye"></i> Student View
+                        </a>
+                    </li>
+                {% else %}
+                    <!-- ================= STUDENT / USER NAVIGATION ================= -->
+                    <li>
+                        <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+                            <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('main.sustainability_map') }}" class="nav-link {% if request.endpoint == 'main.sustainability_map' %}active{% endif %}">
+                            <i class="bi bi-geo-alt-fill"></i> Campus Map
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('assistant.assistant') }}" class="nav-link {% if request.endpoint == 'assistant.assistant' %}active{% endif %}">
+                            <i class="bi bi-robot"></i> AI EcoBot
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('green_hub.green_hub') }}" class="nav-link {% if request.endpoint == 'green_hub.green_hub' %}active{% endif %}">
+                            <i class="bi bi-trophy-fill"></i> Green Hub
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('reports.my_reports') }}" class="nav-link {% if request.endpoint == 'reports.my_reports' %}active{% endif %}">
+                            <i class="bi bi-journal-check"></i> My Reports
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('monitoring.energy_water') }}" class="nav-link {% if request.endpoint == 'monitoring.energy_water' %}active{% endif %}">
+                            <i class="bi bi-lightning-charge-fill"></i> Telemetry
+                        </a>
+                    </li>
+                    {% if current_user and current_user.role == 'staff' %}
+                    <li>
+                        <a href="{{ url_for('maintenance.maintenance_queue') }}" class="nav-link {% if request.endpoint == 'maintenance.maintenance_queue' %}active{% endif %}" style="color: #B45309;">
+                            <i class="bi bi-tools"></i> Assigned Tasks
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <!-- Actions / User Area -->
+            <div class="nav-actions">
+                {% if current_user and current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.all_reports') }}" class="btn-report">
+                        <i class="bi bi-exclamation-square-fill"></i> All Problems
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('reports.report_issue') }}" class="btn-report">
+                        <i class="bi bi-plus-circle-fill"></i> Report Issue
+                    </a>
+                {% endif %}
+
+                {% if current_user %}
+                    <a href="{{ url_for('main.notifications') }}" class="notif-btn" title="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="notif-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+
+                    <div class="user-badge">
+                        <div class="user-avatar" style="background-color: {{ current_user.avatar_color or '#2E7D32' }};">
+                            {{ current_user.full_name[:1] }}
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">{{ current_user.full_name }}</div>
+                            <div class="user-role-tag">{{ current_user.role }} • {{ current_user.green_points }} pts</div>
+                        </div>
+                        <a href="{{ url_for('reports.my_reports') }}" style="color: var(--text-muted); margin-left: 4px;" title="My Reports">
+                            <i class="bi bi-journal-text"></i>
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" style="color: var(--text-muted); margin-left: 4px;" title="Sign Out">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('auth.admin_login') }}" class="btn btn-secondary btn-sm" style="color: #B45309;" title="University Administrator Sign-In">
+                        <i class="bi bi-shield-lock-fill"></i> Admin
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Sign In</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages Container -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; color: inherit; font-size: 1.1rem;">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional University Footer -->
+    <footer class="campus-footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h4>Dayananda Sagar University (DSU)</h4>
+                <p>
+                    <strong>Innovation Campus:</strong> Kanakapura Road, Harohalli, Bengaluru Rural / Ramanagara District, Karnataka, India.<br>
+                    <strong>City Campus:</strong> Kudlu Gate, Hosur Road, Bengaluru, Karnataka.<br>
+                    CampusMindAi unites students, faculty, and maintenance staff to eliminate resource waste, advance environmental stewardship, and track green milestones.
+                </p>
+                <div style="margin-top: 14px;">
+                    <span class="verified-campus-badge">
+                        <i class="bi bi-check-circle-fill"></i> Verified University Geospatial Data & Landmarks
+                    </span>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Platform Navigation</h4>
+                <ul>
+                    <li><a href="{{ url_for('main.dashboard') }}">Sustainability Dashboard</a></li>
+                    <li><a href="{{ url_for('reports.report_issue') }}">Report Environmental Problem</a></li>
+                    <li><a href="{{ url_for('main.sustainability_map') }}">Operational Campus Map</a></li>
+                    <li><a href="{{ url_for('assistant.assistant') }}">DSU EcoBot AI Assistant</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Green Resources</h4>
+                <ul>
+                    <li><a href="{{ url_for('green_hub.green_hub') }}">Student Green Hub & Badges</a></li>
+                    <li><a href="{{ url_for('monitoring.energy_water') }}">Rooftop Solar & Power Logs</a></li>
+                    <li><a href="{{ url_for('monitoring.waste_management') }}">Campus Waste & STP Recycling</a></li>
+                    <li><a href="{{ url_for('monitoring.impact_analytics') }}">Carbon Emissions Avoided</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Demonstration Notice</h4>
+                <p style="font-size: 0.8125rem; color: #94A3B8;">
+                    This application is built for the collegiate demonstration of <strong>CampusMindAi</strong>.
+                    Sample records, test meter logs, and demonstration issue submissions are explicitly tagged as sample data.
+                </p>
+                <p style="font-size: 0.8125rem; margin-top: 8px; color: #6EE7B7;">
+                    <i class="bi bi-shield-check"></i> Role-Based Access Control Active
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>&copy; 2026 Dayananda Sagar University. All Rights Reserved. CampusMindAi.</div>
+            <div>Designed for Sustainable Campus Excellence • Bengaluru, Karnataka, India</div>
+        </div>
+    </footer>
+
+    <!-- Application Main Script -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

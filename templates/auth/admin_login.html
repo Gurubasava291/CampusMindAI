@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Sign In | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 40px auto;">
+
+    <div class="card" style="padding: 32px; border-top: 4px solid #D97706;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <img class="auth-brand-logo" src="{{ url_for('static', filename='img/campusmindai-logo.svg') }}" alt="CampusMindAi">
+            <h2 style="font-size: 1.5rem; color: var(--forest-green-dark);">Administrator Access</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">
+                Executive Operations Console • Dayananda Sagar University
+            </p>
+        </div>
+
+        <div style="background: #FEF3C7; border: 1px solid #FDE68A; border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 18px; font-size: 0.8125rem; color: #92400E; display: flex; align-items: flex-start; gap: 8px;">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.1rem; color: #D97706;"></i>
+            <span><strong>Restricted Portal:</strong> Elevated operational access. Only verified university administrator credentials are accepted here.</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.admin_login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div style="margin-bottom: 18px;">
+                <label for="login_input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Administrator Email or Username
+                </label>
+                <input type="text" id="login_input" name="login_input" required value="{{ request.args.get('email', '') }}" placeholder="e.g. admin@dsu.edu.in"
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="margin-bottom: 22px;">
+                <label for="password" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Administrator Password <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="password" id="password" name="password" required placeholder="••••••••" autofocus
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="text-align: right; margin: -12px 0 16px; font-size: 0.8125rem;">
+                <a href="{{ url_for('auth.forgot_password') }}" style="font-weight: 600; color: var(--forest-green);">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-size: 1rem; margin-bottom: 16px; background: linear-gradient(135deg, #1E3F20, #0D2818); border: 1px solid #F59E0B;">
+                <i class="bi bi-unlock-fill"></i> Unlock Administrator Console
+            </button>
+
+            <div style="text-align: center; font-size: 0.8125rem; color: var(--text-secondary);">
+                Not an administrator? <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: var(--forest-green);">Go to Student / Staff Sign-In</a>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

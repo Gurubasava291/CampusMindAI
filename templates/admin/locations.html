@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Locations | Admin | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Verified Campus Locations</h2>
+            <p class="page-subtitle">
+                Buildings, blocks, and floors available for environmental issue reporting at Dayananda Sagar University.
+            </p>
+        </div>
+    </div>
+
+    <!-- Add Location Form -->
+    <div class="card" style="margin-bottom: 28px; background: #F8FAF8; border: 1px solid var(--border-medium);">
+        <div class="card-header">
+            <div class="card-title" style="font-size: 1rem;">
+                <i class="bi bi-plus-circle-fill"></i> Register Campus Building / Wing
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin.locations') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: flex-end;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Campus:</label>
+                <select name="campus_name" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                    <option value="Main Innovation Campus (Harohalli)">Harohalli Innovation Campus</option>
+                    <option value="City Campus (Kudlu Gate)">City Campus (Kudlu Gate)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Building Name:</label>
+                <input type="text" name="building_name" required placeholder="e.g. Academic Block C" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Floor:</label>
+                <input type="text" name="floor" required placeholder="e.g. 2nd Floor" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Zone / Wing:</label>
+                <input type="text" name="zone_or_wing" required placeholder="e.g. East Wing" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 9px;">
+                    <i class="bi bi-save"></i> Save Location
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Locations Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Campus</th>
+                        <th>Building</th>
+                        <th>Floor</th>
+                        <th>Zone / Wing</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in locations %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ l.campus_name.split('(')[0] }}</td>
+                        <td style="font-weight: 600; color: var(--forest-green-dark);">{{ l.building_name }}</td>
+                        <td>{{ l.floor }}</td>
+                        <td>{{ l.zone_or_wing }}</td>
+                        <td style="font-family: monospace; font-size: 0.75rem;">{{ l.latitude }}</td>
+                        <td style="font-family: monospace; font-size: 0.75rem;">{{ l.longitude }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

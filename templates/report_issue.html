@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Report Environmental Issue | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Report Campus Environmental Issue</h2>
+            <p class="page-subtitle">
+                Dayananda Sagar University (DSU) • Kanakapura Road & Kudlu Gate Campuses
+            </p>
+        </div>
+        <div>
+            <span class="badge badge-resolved" style="padding: 6px 14px; font-size: 0.8125rem;">
+                <i class="bi bi-star-fill"></i> +50 Green Points on Verified Submission
+            </span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 28px;">
+
+        <!-- Form Column -->
+        <div class="card">
+            <form action="{{ url_for('reports.report_issue') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                <!-- Title -->
+                <div style="margin-bottom: 20px;">
+                    <label for="report-title" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        Issue Title <span style="color: #DC2626;">*</span>
+                    </label>
+                    <input type="text" id="report-title" name="title" required placeholder="e.g., Continuous urinal valve leak, AC running in empty lab"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+                </div>
+
+                <!-- Description -->
+                <div style="margin-bottom: 20px;">
+                    <label for="report-description" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        Detailed Description <span style="color: #DC2626;">*</span>
+                    </label>
+                    <textarea id="report-description" name="description" rows="4" required placeholder="Describe what you observed, severity of leak/power draw, and any safety hazards..."
+                              style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;"></textarea>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block;">
+                        💡 Our campus AI engine will analyze your description in real-time to suggest category and urgency.
+                    </span>
+                </div>
+
+                <!-- Campus Location Selection -->
+                <div style="margin-bottom: 20px;">
+                    <label for="location_id" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        Verified Campus Building & Zone <span style="color: #DC2626;">*</span>
+                    </label>
+                    <select id="location_id" name="location_id" required
+                            style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem; background: white;">
+                        <option value="">-- Select Campus Location --</option>
+                        {% for loc in locations %}
+                        <option value="{{ loc.id }}">
+                            {{ loc.campus_name.split('(')[0] }} • {{ loc.building_name }} ({{ loc.floor }} - {{ loc.zone_or_wing }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Specific Spot Details -->
+                <div style="margin-bottom: 20px;">
+                    <label for="report-spot" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        Exact Spot / Room # / Landmark <span style="color: #DC2626;">*</span>
+                    </label>
+                    <input type="text" id="report-spot" name="specific_spot" required placeholder="e.g., Room 304 near window, North rest facility 2nd stall"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+                </div>
+
+                <!-- Manual Override for Category & Priority -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label for="report-category" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                            Category (AI-Assisted)
+                        </label>
+                        <select id="report-category" name="category" onchange="this.dataset.userModified='true'"
+                                style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem; background: white;">
+                            <option value="water">💧 Water Wastage</option>
+                            <option value="electricity">⚡ Electricity Wastage</option>
+                            <option value="waste">♻️ Waste Management</option>
+                            <option value="greenery">🌿 Green Spaces</option>
+                            <option value="infrastructure">🔧 Infrastructure Problem</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="report-priority" style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                            Priority (AI-Assisted)
+                        </label>
+                        <select id="report-priority" name="priority" onchange="this.dataset.userModified='true'"
+                                style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem; background: white;">
+                            <option value="low">Low (Minor aesthetic)</option>
+                            <option value="medium" selected>Medium (Standard maintenance)</option>
+                            <option value="high">High (Urgent loss/disruption)</option>
+                            <option value="critical">Critical (Immediate safety hazard)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Photograph Upload -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 6px;">
+                        Upload Photographic Evidence
+                    </label>
+                    <div style="border: 2px dashed var(--border-medium); padding: 20px; border-radius: var(--radius-md); text-align: center; background: var(--bg-alt);">
+                        <i class="bi bi-camera-fill" style="font-size: 2rem; color: var(--sage-green);"></i>
+                        <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 6px 0 10px;">
+                            Attach a clear photo of the leak, unsegregated waste, or electrical hazard
+                        </p>
+                        <input type="file" id="photo-input" name="photo" accept="image/png, image/jpeg, image/webp"
+                               style="display: block; margin: 0 auto; font-size: 0.8125rem;">
+                        <div id="photo-preview-container" style="display: none; margin-top: 14px;">
+                            <img id="photo-preview-img" src="" alt="Preview" style="max-height: 160px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anonymous Reporting Toggle -->
+                <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px; background: #F8FAF8; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                    <input type="checkbox" id="is_anonymous" name="is_anonymous" style="width: 18px; height: 18px; accent-color: var(--forest-green);">
+                    <label for="is_anonymous" style="font-size: 0.875rem; color: var(--text-secondary); cursor: pointer;">
+                        <strong>Report Anonymously</strong> — Hide my name and student ID from public status records (university policy compliant).
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+                    <i class="bi bi-send-check-fill"></i> Submit Report & Earn Green Points
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column: Real-Time AI Intelligence Engine & Containment Tips -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- Real-Time AI Recommendation Card -->
+            <div id="ai-recommendation-card" class="card" style="border: 1px solid #BBF7D0; background: #F0FDF4;">
+                <div class="card-header" style="border-bottom: 1px solid #BBF7D0;">
+                    <div class="card-title" style="color: #166534; font-size: 1.05rem;">
+                        <i class="bi bi-cpu-fill"></i> AI Issue Intelligence Engine
+                    </div>
+                    <span id="ai-analyzing-spinner" style="display: none; font-size: 0.75rem; color: #15803D;">
+                        <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite;"></i> Analyzing...
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #166534; margin-bottom: 6px;">
+                        Predicted Category & Recommended Priority
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span id="ai-predicted-category" class="badge badge-water">WATER</span>
+                        <span id="ai-suggested-priority" class="badge priority-medium">MEDIUM</span>
+                    </div>
+                </div>
+
+                <!-- Confidence Bar -->
+                <div style="margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: #14532D; margin-bottom: 4px;">
+                        <span>AI Confidence Score</span>
+                        <span>92%</span>
+                    </div>
+                    <div style="height: 6px; background: #DCFCE7; border-radius: var(--radius-full); overflow: hidden;">
+                        <div id="ai-confidence-meter" style="width: 92%; height: 100%; background: #16A34A; border-radius: var(--radius-full);"></div>
+                    </div>
+                </div>
+
+                <!-- Reasoning & Environmental Impact -->
+                <div style="font-size: 0.8125rem; color: #14532D; line-height: 1.5; margin-bottom: 12px;">
+                    <strong>AI Urgency Assessment:</strong><br>
+                    <span id="ai-reasoning-text">Continuous resource loss detected requiring facilities attention.</span>
+                </div>
+
+                <div style="font-size: 0.8125rem; color: #14532D; line-height: 1.5; margin-bottom: 14px; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: var(--radius-sm);">
+                    <strong>Estimated Environmental Impact:</strong><br>
+                    <span id="ai-impact-text">Estimated loss of 400 - 900 Liters/day if left uncorrected.</span>
+                </div>
+
+                <!-- Containment Checklist -->
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #166534; margin-bottom: 6px;">
+                        Suggested Immediate Actions & Safety Tips:
+                    </div>
+                    <ul id="ai-actions-list" style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 4px; font-size: 13px; color: #14532D;">✓ Shut off local angle isolation valve if safe.</li>
+                        <li style="margin-bottom: 4px; font-size: 13px; color: #14532D;">✓ Avoid touching damp electrical fittings.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- University Policy Card -->
+            <div class="card" style="background: var(--bg-surface);">
+                <h4 style="font-size: 0.9375rem; margin-bottom: 10px; color: var(--forest-green-dark);">
+                    <i class="bi bi-shield-check"></i> DSU Campus Care Protocol
+                </h4>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.6;">
+                    Dayananda Sagar University commits to inspecting critical hazards within <strong>2 hours</strong> and standard maintenance requests within <strong>24 hours</strong>.
+                    You will receive status alerts as your ticket moves from <em>Submitted &rarr; Verified &rarr; Assigned &rarr; Resolved</em>.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Create DSU Account | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 540px; margin: 30px auto;">
+
+    <div class="card" style="padding: 32px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <img class="auth-brand-logo" src="{{ url_for('static', filename='img/campusmindai-logo.svg') }}" alt="CampusMindAi">
+            <h2 style="font-size: 1.6rem; color: var(--forest-green-dark);">Create your account</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 4px;">
+                Earn +50 Green Points Welcome Bonus on registration!
+            </p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div style="margin-bottom: 16px;">
+                <label for="full_name" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Full Name <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="text" id="full_name" name="full_name" required placeholder="e.g. Pooja Rao"
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                <div>
+                    <label for="username" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                        Username <span style="color: #DC2626;">*</span>
+                    </label>
+                    <input type="text" id="username" name="username" required placeholder="pooja_rao"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+                </div>
+                <div>
+                    <label for="email" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                        Email <span style="color: #DC2626;">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" required placeholder="pooja@dsu.edu.in"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="phone_number" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Phone Number for Recovery <span style="color: #DC2626;">*</span>
+                </label>
+                  <input type="tel" id="phone_number" name="phone_number" required inputmode="tel" maxlength="16" pattern="[+]?[0-9]{8,15}" oninput="this.value = this.value.replace(/[^0-9+]/g, '').replace(/(?!^)[+]/g, '')" placeholder="+919876543210"
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="department_id" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    School / Department
+                </label>
+                <select id="department_id" name="department_id" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem; background: white;">
+                    <option value="">-- Select Your Department --</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label for="campus" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Primary Campus
+                </label>
+                <select id="campus" name="campus" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem; background: white;">
+                    <option value="Main Innovation Campus (Harohalli)">Main Innovation Campus (Harohalli, Kanakapura Road)</option>
+                    <option value="City Campus (Kudlu Gate)">City Campus (Kudlu Gate / Hosur Road)</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 22px;">
+                <label for="password" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+                    Create Password (min 6 characters) <span style="color: #DC2626;">*</span>
+                </label>
+                <input type="password" id="password" name="password" minlength="6" required placeholder="••••••••"
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); font-family: inherit; font-size: 0.9375rem;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-size: 1rem; margin-bottom: 16px;">
+                Register & Claim 50 Green Points
+            </button>
+
+            <div style="text-align: center; font-size: 0.8125rem; color: var(--text-secondary);">
+                Already have an account? <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: var(--forest-green);">Sign In here</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

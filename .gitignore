@@ -1,0 +1,35 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database
+instance/
+*.db
+
+# Uploads
+static/uploads/*
+!static/uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

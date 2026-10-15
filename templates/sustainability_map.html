@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Sustainability Map | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Campus Sustainability Operational Map</h2>
+            <p class="page-subtitle">
+                Geospatial visualization of active & resolved environmental issues across Dayananda Sagar University.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{{ url_for('reports.report_issue') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Pin New Issue
+            </a>
+        </div>
+    </div>
+
+    <!-- Map Filter Toolbar -->
+    <div class="card" style="margin-bottom: 20px; padding: 14px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.8125rem; font-weight: 700; color: var(--forest-green-dark);">
+                    <i class="bi bi-funnel-fill"></i> Map Filters:
+                </span>
+
+                <select id="filter-category" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                    <option value="">All Categories</option>
+                    <option value="water">💧 Water Wastage</option>
+                    <option value="electricity">⚡ Electricity</option>
+                    <option value="waste">♻️ Waste Management</option>
+                    <option value="greenery">🌿 Green Spaces</option>
+                    <option value="infrastructure">🔧 Infrastructure</option>
+                </select>
+
+                <select id="filter-status" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                    <option value="">All Statuses</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+
+                <select id="filter-priority" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                    <option value="">All Priorities</option>
+                    <option value="critical">Critical Urgency</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <button type="button" id="filter-reset-btn" class="btn btn-secondary btn-sm">Reset</button>
+            </div>
+
+            <div>
+                <span id="map-issues-count" style="font-size: 0.8125rem; font-weight: 600; color: var(--sage-green);">
+                    Loading mapped issues...
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Viewport -->
+    <div class="card" style="padding: 6px; overflow: hidden;">
+        <div id="sustainability-map-view" class="operational-map-container"
+             data-lat="{{ campus_cfg.default_lat }}"
+             data-lng="{{ campus_cfg.default_lng }}"
+             data-zoom="{{ campus_cfg.default_zoom }}">
+        </div>
+    </div>
+
+    <!-- Map Legend -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <span><strong>Icons:</strong></span>
+            <span>💧 Water Leak</span>
+            <span>⚡ Power/Lighting</span>
+            <span>♻️ Waste/Segregation</span>
+            <span>🌿 Greenery</span>
+            <span>🔧 Facilities</span>
+        </div>
+        <div style="display: flex; gap: 14px; align-items: center;">
+            <span><strong>Priority Border:</strong></span>
+            <span><span class="priority-dot critical"></span> Critical</span>
+            <span><span class="priority-dot high"></span> High</span>
+            <span><span class="priority-dot medium"></span> Medium</span>
+            <span><span class="priority-dot low"></span> Low</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

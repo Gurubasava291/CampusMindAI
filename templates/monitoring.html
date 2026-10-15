@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Energy & Water Monitoring | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Campus Energy & Water Monitoring</h2>
+            <p class="page-subtitle">
+                Dayananda Sagar University (DSU) • Substation Feeders, Solar Photovoltaic Farm & STP Conservation.
+            </p>
+        </div>
+        <div>
+            <span class="verified-campus-badge">
+                <i class="bi bi-broadcast"></i> IoT & Manual Meter Feeds Active
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+        <div class="kpi-card">
+            <div class="kpi-icon solar"><i class="bi bi-sun-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Solar Generation</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(totals.total_solar) }} <span style="font-size: 1rem;">kWh</span></div>
+                <div class="kpi-subtext">Rooftop Clean Energy</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon pending"><i class="bi bi-lightning-charge-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Grid Power Draw</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(totals.total_grid_kwh) }} <span style="font-size: 1rem;">kWh</span></div>
+                <div class="kpi-subtext">BESCOM Main Import</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon water"><i class="bi bi-droplet-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Water Consumed</div>
+                <div class="kpi-value">{{ "{:,.0f}".format(totals.total_water) }} <span style="font-size: 1rem;">L</span></div>
+                <div class="kpi-subtext">Campus Distribution</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon resolved"><i class="bi bi-water"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Recycled (STP)</div>
+                <div class="kpi-value">{{ "{:,.0f}".format(totals.total_recycled) }} <span style="font-size: 1rem;">L</span></div>
+                <div class="kpi-subtext">Treated & Reused (100%)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Manual Log Form (Accordion/Card) -->
+    {% if current_user and current_user.role in ('staff', 'admin') %}
+    <div class="card" style="margin-bottom: 28px; background: #F8FAF8; border: 1px solid var(--border-medium);">
+        <div class="card-header">
+            <div class="card-title" style="font-size: 1rem; color: var(--forest-green-dark);">
+                <i class="bi bi-pencil-square"></i> Log Meter Reading (Staff Utility Cell)
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Manual Entry / IoT Sync</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('monitoring.energy_water') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Metric Type:</label>
+                <select name="log_type" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                    <option value="energy">⚡ Electricity & Solar (kWh)</option>
+                    <option value="water">💧 Water & STP Recycled (Liters)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Reading Date:</label>
+                <input type="date" name="reading_date" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Grid / Consumed Value:</label>
+                <input type="number" step="0.1" name="kwh_consumed" placeholder="kWh or Liters" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Solar / Recycled Value:</label>
+                <input type="number" step="0.1" name="solar_generated_kwh" placeholder="Solar kWh or Recycled L" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 9px;">
+                    <i class="bi bi-cloud-arrow-up-fill"></i> Save Reading
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Historical Data Tables: Energy & Water -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- Energy Logs -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-lightning-fill" style="color: #D97706;"></i>
+                    Recent Electricity & Solar Logs
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Grid Consumed</th>
+                            <th>Solar Generated</th>
+                            <th>Peak Load</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in energy_logs %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ e.reading_date }}</td>
+                            <td>{{ e.kwh_consumed }} kWh</td>
+                            <td style="color: #16A34A; font-weight: 600;">+{{ e.solar_generated_kwh }} kWh</td>
+                            <td style="color: var(--text-muted); font-size: 0.8125rem;">{{ e.peak_load_kw }} kW</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Water Logs -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-droplet-fill" style="color: #0284C7;"></i>
+                    Recent Water & STP Recycled Logs
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Consumed</th>
+                            <th>STP Recycled</th>
+                            <th>Rainwater</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in water_logs %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ w.reading_date }}</td>
+                            <td>{{ "{:,.0f}".format(w.liters_consumed) }} L</td>
+                            <td style="color: #0284C7; font-weight: 600;">+{{ "{:,.0f}".format(w.recycled_water_liters) }} L</td>
+                            <td style="color: #16A34A; font-size: 0.8125rem;">{{ "{:,.0f}".format(w.rainwater_harvested_liters) }} L</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

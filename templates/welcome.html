@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to CampusMindAi | Dayananda Sagar University{% endblock %}
+
+{% block content %}
+<section class="welcome-page">
+    <div class="welcome-intro">
+        <img class="welcome-logo" src="{{ url_for('static', filename='img/campusmindai-logo.svg') }}" alt="CampusMindAi">
+        <p class="welcome-eyebrow">DAYANANDA SAGAR UNIVERSITY</p>
+        <h2>Make campus sustainability actionable.</h2>
+        <p class="welcome-description">
+            CampusMindAi brings campus reporting, maintenance, and environmental insights together so the DSU community can turn everyday observations into measurable progress.
+        </p>
+        <div class="welcome-actions">
+            <a class="btn btn-primary" href="{{ url_for('auth.login') }}">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </a>
+            <a class="btn btn-secondary" href="{{ url_for('auth.register') }}">Create an account</a>
+        </div>
+        <p class="welcome-campus">Harohalli Innovation Campus <span></span> City Campus, Kudlu Gate</p>
+    </div>
+
+    <div class="welcome-capabilities" aria-label="CampusMindAi areas">
+        <div>
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>Report campus issues</h3>
+            <p>Share a concern and follow its maintenance progress.</p>
+        </div>
+        <div>
+            <i class="bi bi-graph-up-arrow"></i>
+            <h3>Track campus impact</h3>
+            <p>Explore energy, water, waste, and sustainability activity.</p>
+        </div>
+        <div>
+            <i class="bi bi-robot"></i>
+            <h3>Ask CampusMindAi</h3>
+            <p>Get campus guidance and help diagnosing an issue.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Control Panel | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>CampusPulse DSU — Administration Control Panel</h2>
+            <p class="page-subtitle">
+                User role moderation, campus location management, and university audit trail.
+            </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <form action="{{ url_for('admin.seed_demo') }}" method="POST" onsubmit="return confirm('Reset and re-seed database with DSU demo data?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-secondary btn-sm" style="color: #DC2626;">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset Demo Data
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Navigation Quick Links -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;">
+        <a href="{{ url_for('admin.all_reports') }}" class="card" style="padding: 18px; text-decoration: none; border-left: 3px solid #D97706;">
+            <div style="font-size: 1.5rem; color: #D97706; margin-bottom: 6px;"><i class="bi bi-exclamation-square-fill"></i></div>
+            <h4 style="font-size: 1.05rem; margin-bottom: 2px;">All Problems</h4>
+            <div style="font-size: 0.8125rem; color: var(--text-muted);">{{ stats.reports }} reported campus issues</div>
+        </a>
+
+        <a href="{{ url_for('admin.users') }}" class="card" style="padding: 18px; text-decoration: none;">
+            <div style="font-size: 1.5rem; color: #0284C7; margin-bottom: 6px;"><i class="bi bi-people-fill"></i></div>
+            <h4 style="font-size: 1.05rem; margin-bottom: 2px;">User Role Management</h4>
+            <div style="font-size: 0.8125rem; color: var(--text-muted);">{{ stats.users }} registered campus users</div>
+        </a>
+
+        <a href="{{ url_for('admin.locations') }}" class="card" style="padding: 18px; text-decoration: none;">
+            <div style="font-size: 1.5rem; color: #16A34A; margin-bottom: 6px;"><i class="bi bi-geo-alt-fill"></i></div>
+            <h4 style="font-size: 1.05rem; margin-bottom: 2px;">Campus Locations</h4>
+            <div style="font-size: 0.8125rem; color: var(--text-muted);">{{ stats.locations }} verified blocks & wings</div>
+        </a>
+
+        <a href="{{ url_for('admin.audit_logs') }}" class="card" style="padding: 18px; text-decoration: none;">
+            <div style="font-size: 1.5rem; color: #D97706; margin-bottom: 6px;"><i class="bi bi-shield-lock-fill"></i></div>
+            <h4 style="font-size: 1.05rem; margin-bottom: 2px;">Audit Trail Logs</h4>
+            <div style="font-size: 0.8125rem; color: var(--text-muted);">{{ stats.logs }} security & action logs</div>
+        </a>
+    </div>
+
+    <!-- Recent Audit Logs -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-clock-history"></i> Recent Security & System Operations
+            </div>
+            <a href="{{ url_for('admin.audit_logs') }}" style="font-size: 0.75rem; font-weight: 600;">Full Logs &rarr;</a>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>Details</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in recent_logs %}
+                    <tr>
+                        <td style="font-size: 0.75rem; color: var(--text-muted);">{{ l.created_at }}</td>
+                        <td style="font-weight: 600;">{{ l.user_name or 'System' }}</td>
+                        <td><span class="badge badge-submitted">{{ l.action }}</span></td>
+                        <td>{{ l.entity_type }}</td>
+                        <td style="font-size: 0.8125rem;">{{ l.details }}</td>
+                        <td style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted);">{{ l.ip_address }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

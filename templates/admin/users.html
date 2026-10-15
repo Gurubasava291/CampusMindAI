@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users | Admin | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>User & Role Management</h2>
+            <p class="page-subtitle">
+                Moderate university accounts and adjust role permissions (Student, Staff, Admin).
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Recovery Phone</th>
+                        <th>Department</th>
+                        <th>Green Points</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Change Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--forest-green-dark);">
+                            {{ u.full_name }}<br>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">@{{ u.username }}</span>
+                        </td>
+                        <td style="font-size: 0.8125rem;">{{ u.email }}</td>
+                        <td>
+                            <form action="{{ url_for('admin.users') }}" method="POST" style="display: flex; gap: 6px; min-width: 190px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="action" value="update_phone">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="tel" name="phone_number" value="{{ u.phone_number or '' }}" placeholder="+919876543210" inputmode="tel" maxlength="16" pattern="[+]?[0-9]{8,15}" oninput="this.value = this.value.replace(/[^0-9+]/g, '').replace(/(?!^)[+]/g, '')" aria-label="Recovery phone for {{ u.full_name }}" style="min-width: 0; width: 125px;">
+                                <button type="submit" class="btn btn-secondary btn-sm" aria-label="Save recovery phone">Save</button>
+                            </form>
+                        </td>
+                        <td style="font-size: 0.8125rem; color: var(--text-secondary);">{{ u.dept_name or 'General' }}</td>
+                        <td style="font-weight: 700; color: #16A34A;">{{ u.green_points }} pts</td>
+                        <td>
+                            <span class="badge badge-{% if u.role == 'admin' %}critical{% elif u.role == 'staff' %}assigned{% else %}submitted{% endif %}">
+                                {{ u.role.upper() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                                <span style="color: #16A34A; font-weight: 600; font-size: 0.75rem;">● Active</span>
+                            {% else %}
+                                <span style="color: #DC2626; font-weight: 600; font-size: 0.75rem;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin.users') }}" method="POST" style="display: flex; gap: 6px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="action" value="update_role">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <select name="role" onchange="this.form.submit()" style="padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.75rem;">
+                                    <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                                    <option value="staff" {% if u.role == 'staff' %}selected{% endif %}>Staff</option>
+                                    <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

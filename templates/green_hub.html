@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Green Hub & Student Engagement | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>DSU Green Hub & Student Engagement</h2>
+            <p class="page-subtitle">
+                Earn Green Points, unlock university sustainability badges, join eco-challenges, and compete on the campus leaderboard.
+            </p>
+        </div>
+        <div>
+            {% if current_user %}
+            <div style="background: linear-gradient(135deg, var(--forest-green), var(--sage-green)); color: white; padding: 10px 20px; border-radius: var(--radius-full); display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-sm);">
+                <i class="bi bi-award-fill" style="font-size: 1.25rem;"></i>
+                <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; opacity: 0.9;">Your Balance:</span>
+                    <strong style="font-size: 1.1rem; margin-left: 4px;">{{ current_user.green_points }} Points</strong>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Active Badges Showcase Grid -->
+    <div class="card" style="margin-bottom: 28px;">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-shield-fill-check" style="color: var(--forest-green);"></i>
+                DSU Sustainability Badges
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Points-based recognition milestones</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px;">
+            {% for b in all_badges %}
+            {% set is_unlocked = false %}
+            {% if current_user %}
+                {% for ub in user_badges %}
+                    {% if ub.badge_id == b.id %}{% set is_unlocked = true %}{% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <div style="border: 1px solid {% if is_unlocked %}#86EFAC{% else %}var(--border-medium){% endif %};
+                        background: {% if is_unlocked %}#F0FDF4{% else %}var(--bg-alt){% endif %};
+                        border-radius: var(--radius-lg); padding: 18px; text-align: center; position: relative;">
+                {% if is_unlocked %}
+                    <span style="position: absolute; top: 10px; right: 10px; background: #16A34A; color: white; font-size: 0.6875rem; font-weight: 700; padding: 2px 6px; border-radius: var(--radius-sm);">
+                        UNLOCKED
+                    </span>
+                {% else %}
+                    <span style="position: absolute; top: 10px; right: 10px; background: #E2E8F0; color: #64748B; font-size: 0.6875rem; font-weight: 700; padding: 2px 6px; border-radius: var(--radius-sm);">
+                        {{ b.points_threshold }} PTS
+                    </span>
+                {% endif %}
+
+                <div style="width: 56px; height: 56px; border-radius: 50%; margin: 10px auto 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+                            background: {% if is_unlocked %}linear-gradient(135deg, var(--forest-green), var(--sage-green)){% else %}#E2E8F0{% endif %};
+                            color: {% if is_unlocked %}white{% else %}#94A3B8{% endif %};">
+                    <i class="bi {{ b.icon }}"></i>
+                </div>
+
+                <h4 style="font-size: 1rem; margin-bottom: 4px; color: {% if is_unlocked %}var(--forest-green-dark){% else %}#475569{% endif %};">
+                    {{ b.name }}
+                </h4>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                    {{ b.description }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Active Campus Challenges & Daily Quiz -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; margin-bottom: 28px;">
+
+        <!-- Active Challenges -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-flag-fill" style="color: var(--forest-green);"></i>
+                    Active Campus Sustainability Challenges
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Join to earn green points</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for c in challenges %}
+                {% set p_status = user_challenges.get(c.id) %}
+                <div style="border: 1px solid var(--border-medium); border-radius: var(--radius-md); padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; background: white; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 14px; align-items: flex-start;">
+                        <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: #E0F2FE; color: #0369A1; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="bi {{ c.icon }}"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--sage-green);">{{ c.category }} • {{ c.participants_count }} Students Joined</div>
+                            <h4 style="font-size: 1.05rem; margin: 2px 0 4px;">{{ c.title }}</h4>
+                            <p style="font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.4;">{{ c.description }}</p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <span style="font-weight: 700; color: #16A34A; font-size: 0.9375rem;">+{{ c.points_reward }} PTS</span>
+
+                        {% if not current_user %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Sign In to Join</a>
+                        {% elif p_status == 'completed' %}
+                            <span class="badge badge-resolved"><i class="bi bi-check-circle-fill"></i> Completed</span>
+                        {% elif p_status == 'joined' %}
+                            <form action="{{ url_for('green_hub.complete_challenge', challenge_id=c.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check2"></i> Claim Points
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('green_hub.join_challenge', challenge_id=c.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    Join Challenge
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Daily Sustainability Quiz Widget -->
+        <div class="card" style="background: linear-gradient(180deg, #F0FDF4, #FFFFFF); border: 1px solid #BBF7D0;">
+            <div class="card-header" style="border-bottom: 1px solid #BBF7D0;">
+                <div class="card-title" style="color: #14532D;">
+                    <i class="bi bi-question-diamond-fill"></i> Daily Green Quiz
+                </div>
+                <span class="badge badge-resolved">+30 PTS</span>
+            </div>
+
+            <div id="quiz-container">
+                <div id="quiz-question" style="font-size: 0.9375rem; font-weight: 600; color: #0D2818; margin-bottom: 14px;">
+                    What should be placed in the Blue Campus Waste Bins at Dayananda Sagar University?
+                </div>
+
+                <div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+                    <button type="button" class="btn btn-secondary btn-sm quiz-opt" style="text-align: left; justify-content: flex-start;" onclick="answerQuiz(false)">
+                        A) Canteen wet food scraps & tea leaves
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm quiz-opt" style="text-align: left; justify-content: flex-start;" onclick="answerQuiz(true)">
+                        B) Clean paper, cardboard & plastic bottles
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm quiz-opt" style="text-align: left; justify-content: flex-start;" onclick="answerQuiz(false)">
+                        C) Hazardous lab chemicals & CFL tubes
+                    </button>
+                </div>
+
+                <div id="quiz-result" style="display: none; padding: 12px; border-radius: var(--radius-md); font-size: 0.8125rem; line-height: 1.5;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Leaderboards Section (Students & Departments) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+
+        <!-- Student Leaderboard -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-trophy-fill" style="color: #EAB308;"></i>
+                    Top Student Eco Leaders
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Department</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in student_leaderboard %}
+                        <tr>
+                            <td style="font-weight: 700; width: 40px;">
+                                {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                            </td>
+                            <td style="font-weight: 600; color: var(--forest-green-dark);">
+                                {{ s.full_name }}
+                            </td>
+                            <td style="font-size: 0.8125rem; color: var(--text-secondary);">
+                                {{ s.dept_name or 'Dayananda Sagar University' }}
+                            </td>
+                            <td style="font-weight: 700; color: #16A34A;">
+                                {{ s.green_points }} pts
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Department Leaderboard -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-building" style="color: var(--forest-green);"></i>
+                    Department Sustainability Ranks
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>School / Department</th>
+                            <th>Students</th>
+                            <th>Total Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in dept_leaderboard %}
+                        <tr>
+                            <td style="font-weight: 700;">#{{ loop.index }}</td>
+                            <td style="font-weight: 600; color: var(--forest-green-dark);">
+                                {{ d.name }}
+                            </td>
+                            <td style="font-size: 0.8125rem; color: var(--text-secondary);">
+                                {{ d.student_count }}
+                            </td>
+                            <td style="font-weight: 700; color: var(--forest-green);">
+                                {{ d.total_points }} pts
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function answerQuiz(isCorrect) {
+    const resBox = document.getElementById('quiz-result');
+    const opts = document.querySelectorAll('.quiz-opt');
+    opts.forEach(o => o.disabled = true);
+
+    if (isCorrect) {
+        resBox.style.display = 'block';
+        resBox.style.background = '#DCFCE7';
+        resBox.style.color = '#14532D';
+        resBox.style.border = '1px solid #86EFAC';
+        resBox.innerHTML = '<strong>🎉 Correct!</strong> Blue bins are designated exclusively for dry recyclables like paper, cardboard, and plastic beverage bottles. Points awarded!';
+
+        fetch('/api/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: 3, total: 3 })
+        });
+    } else {
+        resBox.style.display = 'block';
+        resBox.style.background = '#FEF2F2';
+        resBox.style.color = '#991B1B';
+        resBox.style.border = '1px solid #FECACA';
+        resBox.innerHTML = '<strong>Incorrect.</strong> Remember: Green is for wet/organic food waste, Blue is for dry recyclables, and Red is for hazardous e-waste.';
+    }
+}
+</script>
+{% endblock %}

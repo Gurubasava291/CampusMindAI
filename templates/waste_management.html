@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Waste Management & Recycling | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Campus Waste Management & Circular Economy</h2>
+            <p class="page-subtitle">
+                Dayananda Sagar University (DSU) • 3-Stream Segregation, Organic Composting & Landfill Diversion.
+            </p>
+        </div>
+        <div>
+            <span class="badge badge-resolved" style="padding: 6px 14px; font-size: 0.8125rem;">
+                <i class="bi bi-recycle"></i> 85%+ Target Diversion Rate
+            </span>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+        <div class="kpi-card">
+            <div class="kpi-icon resolved"><i class="bi bi-flower1"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Organic Composted</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(waste_totals.composted) }} <span style="font-size: 1rem;">kg</span></div>
+                <div class="kpi-subtext">Organic fertilizer generated</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon reports"><i class="bi bi-box-seam-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Dry Recyclables</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(waste_totals.recyclable) }} <span style="font-size: 1rem;">kg</span></div>
+                <div class="kpi-subtext">Paper, bottles & cartons</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon pending"><i class="bi bi-motherboard-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">E-Waste Safe Segregation</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(waste_totals.ewaste) }} <span style="font-size: 1rem;">kg</span></div>
+                <div class="kpi-subtext">Certified recycler pickup</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon carbon"><i class="bi bi-pie-chart-fill"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Landfill Diversion Rate</div>
+                <div class="kpi-value">{{ "{:,.1f}".format(waste_totals.avg_diverted) }}%</div>
+                <div class="kpi-subtext">Zero direct landfill goal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Log Entry Form -->
+    {% if current_user and current_user.role in ('staff', 'admin') %}
+    <div class="card" style="margin-bottom: 28px; background: #F8FAF8; border: 1px solid var(--border-medium);">
+        <div class="card-header">
+            <div class="card-title" style="font-size: 1rem;">
+                <i class="bi bi-plus-circle-fill"></i> Record Weekly Waste & Composting (Housekeeping Cell)
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('monitoring.waste_management') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; align-items: flex-end;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Collection Date:</label>
+                <input type="date" name="record_date" required style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Organic Food (kg):</label>
+                <input type="number" step="0.1" name="organic_kg" required placeholder="0.0" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Recyclable Dry (kg):</label>
+                <input type="number" step="0.1" name="recyclable_kg" required placeholder="0.0" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">E-Waste (kg):</label>
+                <input type="number" step="0.1" name="ewaste_kg" placeholder="0.0" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">Composted (kg):</label>
+                <input type="number" step="0.1" name="composted_kg" placeholder="0.0" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+            </div>
+
+            <div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 9px;">
+                    <i class="bi bi-save-fill"></i> Save Record
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Waste Records Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-table"></i> Weekly Waste Audit Trail
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Main Innovation Campus & City Campus</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Audit Date</th>
+                        <th>Organic Food</th>
+                        <th>Dry Recyclable</th>
+                        <th>E-Waste</th>
+                        <th>Composted Yield</th>
+                        <th>Landfill Diversion %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in waste_logs %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ w.record_date }}</td>
+                        <td>{{ w.organic_kg }} kg</td>
+                        <td style="color: #0284C7; font-weight: 600;">{{ w.recyclable_kg }} kg</td>
+                        <td style="color: #D97706;">{{ w.ewaste_kg }} kg</td>
+                        <td style="color: #16A34A; font-weight: 600;">{{ w.composted_kg }} kg</td>
+                        <td>
+                            <span class="badge badge-resolved">{{ w.landfill_diverted_pct }}%</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

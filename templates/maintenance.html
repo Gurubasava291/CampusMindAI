@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Maintenance Management Queue | CampusPulse DSU{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <div class="page-header">
+        <div class="page-title-group">
+            <h2>Smart Maintenance Management Queue</h2>
+            <p class="page-subtitle">
+                Dayananda Sagar University Facilities, Electrical & Environmental Engineering Work Orders.
+            </p>
+        </div>
+        <div>
+            <span class="badge priority-critical" style="padding: 6px 14px; font-size: 0.8125rem;">
+                <i class="bi bi-exclamation-triangle-fill"></i> {{ counts.critical }} Critical Priority Tickets Active
+            </span>
+        </div>
+    </div>
+
+    <!-- Maintenance Pipeline Status Counts -->
+    <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
+        <a href="{{ url_for('maintenance.maintenance_queue', status='submitted') }}" class="kpi-card" style="padding: 16px;">
+            <div class="kpi-content">
+                <div class="kpi-label">Submitted</div>
+                <div class="kpi-value" style="font-size: 1.5rem;">{{ counts.submitted }}</div>
+                <div class="kpi-subtext">Needs initial review</div>
+            </div>
+        </a>
+        <a href="{{ url_for('maintenance.maintenance_queue', status='assigned') }}" class="kpi-card" style="padding: 16px;">
+            <div class="kpi-content">
+                <div class="kpi-label">Assigned</div>
+                <div class="kpi-value" style="font-size: 1.5rem;">{{ counts.assigned }}</div>
+                <div class="kpi-subtext">Staff assigned</div>
+            </div>
+        </a>
+        <a href="{{ url_for('maintenance.maintenance_queue', status='in_progress') }}" class="kpi-card" style="padding: 16px;">
+            <div class="kpi-content">
+                <div class="kpi-label">In Progress</div>
+                <div class="kpi-value" style="font-size: 1.5rem;">{{ counts.in_progress }}</div>
+                <div class="kpi-subtext">Work ongoing</div>
+            </div>
+        </a>
+        <a href="{{ url_for('maintenance.maintenance_queue', status='resolved') }}" class="kpi-card" style="padding: 16px;">
+            <div class="kpi-content">
+                <div class="kpi-label">Resolved</div>
+                <div class="kpi-value" style="font-size: 1.5rem;">{{ counts.resolved }}</div>
+                <div class="kpi-subtext">Verified repairs</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card" style="margin-bottom: 24px; padding: 14px 20px;">
+        <form method="GET" action="{{ url_for('maintenance.maintenance_queue') }}" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            <div style="font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary);">Queue Filters:</div>
+
+            <select name="status" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                <option value="">All Statuses</option>
+                <option value="submitted" {% if current_status == 'submitted' %}selected{% endif %}>Submitted</option>
+                <option value="verified" {% if current_status == 'verified' %}selected{% endif %}>Verified</option>
+                <option value="assigned" {% if current_status == 'assigned' %}selected{% endif %}>Assigned</option>
+                <option value="in_progress" {% if current_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="resolved" {% if current_status == 'resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+
+            <select name="priority" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                <option value="">All Priorities</option>
+                <option value="critical" {% if current_priority == 'critical' %}selected{% endif %}>Critical</option>
+                <option value="high" {% if current_priority == 'high' %}selected{% endif %}>High</option>
+                <option value="medium" {% if current_priority == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="low" {% if current_priority == 'low' %}selected{% endif %}>Low</option>
+            </select>
+
+            <select name="assigned" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); font-size: 0.8125rem;">
+                <option value="">All Assigned Staff</option>
+                <option value="me" {% if current_assigned == 'me' %}selected{% endif %}>Assigned to Me</option>
+                {% for s in staff_members %}
+                <option value="{{ s.id }}" {% if current_assigned == s.id|string %}selected{% endif %}>{{ s.full_name }}</option>
+                {% endfor %}
+            </select>
+
+            {% if current_status or current_priority or current_assigned %}
+            <a href="{{ url_for('maintenance.maintenance_queue') }}" class="btn btn-secondary btn-sm" style="padding: 4px 10px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Tasks List Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Urgency & Ticket</th>
+                        <th>Issue Summary</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Assigned Staff</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tasks %}
+                    <tr>
+                        <td>
+                            <span class="priority-dot {{ t.priority }}"></span>
+                            <span style="font-weight: 700; font-family: monospace;">{{ t.report_number }}</span>
+                        </td>
+                        <td style="max-width: 240px;">
+                            <div style="font-weight: 600; color: var(--forest-green-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ t.title }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ t.specific_spot }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ t.category }}">{{ t.category }}</span>
+                        </td>
+                        <td style="font-size: 0.8125rem;">
+                            {{ t.building_name }}<br>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ t.floor }}</span>
+                        </td>
+                        <td style="font-size: 0.8125rem;">
+                            {% if t.assigned_staff_name %}
+                                <i class="bi bi-person-fill"></i> {{ t.assigned_staff_name }}
+                            {% else %}
+                                <span style="color: #D97706; font-style: italic;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.75rem; color: var(--text-muted);">
+                            {{ t.due_date or 'Standard' }}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ t.status }}">{{ t.status.replace('_', ' ') }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('reports.report_detail', report_id=t.id) }}" class="btn btn-primary btn-sm">
+                                Manage
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 36px; color: var(--text-muted);">
+                            <i class="bi bi-check2-all" style="font-size: 2rem; color: #16A34A; display: block; margin-bottom: 8px;"></i>
+                            No maintenance tasks match the current filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
