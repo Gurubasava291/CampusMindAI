@@ -8,9 +8,16 @@ load_dotenv(BASE_DIR / ".env")
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dsu_campuspulse_secret_key_default_change_me")
     
+    # Detect Vercel serverless environment (only /tmp is writable)
+    IS_VERCEL = os.getenv("VERCEL", "") == "1"
+    
     # Database
-    INSTANCE_PATH = BASE_DIR / "instance"
-    DATABASE_PATH = INSTANCE_PATH / "campuspulse.db"
+    if IS_VERCEL:
+        INSTANCE_PATH = Path("/tmp/instance")
+        DATABASE_PATH = INSTANCE_PATH / "campuspulse.db"
+    else:
+        INSTANCE_PATH = BASE_DIR / "instance"
+        DATABASE_PATH = INSTANCE_PATH / "campuspulse.db"
     
     # Campus Details
     CAMPUS_NAME = os.getenv("CAMPUS_NAME", "Dayananda Sagar University")
@@ -43,7 +50,10 @@ class Config:
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "").strip()
     
     # Uploads
-    UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
+    if IS_VERCEL:
+        UPLOAD_FOLDER = Path("/tmp/uploads")
+    else:
+        UPLOAD_FOLDER = BASE_DIR / "static" / "uploads"
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", 16 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     
