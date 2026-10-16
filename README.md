@@ -195,9 +195,28 @@ python -m pytest
 *The automated suite covers authentication, AI classification, reporting lifecycle, and role access control.*
 
 ### 5. Launch CampusPulse DSU
-```bash
-python app.py
+
+I’ll check the project’s documented commands and frontend scripts so I can give you the exact two-terminal startup steps and the URLs to verify each side.
+
+Run the backend and frontend in **two VS Code terminals** from the project folder.
+
+**Terminal 1: Flask backend**
+```powershell
+py -m pip install -r requirements.txt
+py app.py
 ```
+or
+
+**Terminal 2: React frontend**
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://127.0.0.1:5173** to view the frontend. To confirm the backend is responding, open **http://127.0.0.1:5000/api/cat**; it should return `{"status":"success","message":"Backend is running"}`. Keep both terminals running while you use the app.
+
+
 Open your browser and navigate to:
 👉 **`http://127.0.0.1:5000`**
 
